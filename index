@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            margin: 0;    
+            padding: 0;    
+            background-image: url('https://i0.wp.com/sitedosgeeks.com/wp-content/uploads/2020/10/leandro-hassum-tudo-bem-no-natal-que-vem-netflix-coletivo-nerd.jpg?fit=1200%2C675');    
+            background-size: cover;    
+            color: #fff;   
+            display: flex;   
+            justify-content: center;    
+            align-items: center;   
+            min-height: 100vh;
+        }
+        .container{
+    
+            width: 80%;    
+            text-align: center;    
+            margin-bottom: 100px;
+        }
+        h1{    
+            font-size: 3rem;    
+            margin: 30px 0;
+        }
+        input[type="text"],
+        button{   
+            padding: 8px;   
+            margin: 5px 0;    
+            width: 50%;    
+            background-color: rgba(46, 44, 44, 0.3);    
+            border: none;    
+            color: #fff;    
+            border-radius: 3px;    
+            font-size: 0.9rem;
+        }
+        input[type="text"]::placeholder{
+            color: #ffffff;
+        }
+        button{   
+            background-color: #e50914;   
+            cursor: pointer;    
+            transition: background-color 0.3s ease;    
+            font-size: 0.8rem;    
+            padding: 6px;
+        }
+        button:hover {    
+            background-color: #ff0000;
+        }
+        #mensagemDeErro {
+            color: red;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #listaFilmes {    
+            display: flex;    
+            flex-wrap: wrap;    
+            gap: 20px;    
+            justify-content: center;
+        }
+        .filme {   
+            width: calc(50% - 20px);  
+            background-color: #333;  
+            padding: 20px;  
+            border-radius: 5px;   
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);   
+            text-align: justify;   
+            line-height: 1.4;   
+            margin-bottom: 20px;
+        }
+        .filme img {    
+            width: 100%;    
+            height: 300px;    
+            object-fit: cover;    
+            border-radius: 5px;    
+            margin-bottom: 15px;
+        }
+        .filme h3 {  
+            margin: 0;   
+            font-size: 1.3rem;
+        }
+        .filme p {
+    
+            margin: 5px 0;   
+            font-size: 0.9rem;    
+            line-height: 1.4;
+        }
+        .filme a {   
+            text-decoration: none;   
+            color: #fff;   
+            font-weight: bold;    
+            display: block;    
+            padding: 8px;    
+            background-color: #e50914;    
+            border-radius: 3px;    
+            transition: background-color 0.3s ease;    
+            font-size: 0.8rem;
+        }
+        .filme a:hover {
+            background-color: #ff0000;
+        }
+        footer { 
+            background-color: #1b1b1f;  
+            color: #ffffff; 
+            text-align: center; 
+            padding: 15px;  
+            position: fixed;   
+            bottom: 0;   
+            width: 100%;  
+            font-size: 14px;    
+            opacity: 0.5;   
+            z-index: 1;    
+            margin-top: 40px;
+        }
+        .posterFilme {    
+            width: 200px;    
+            height: auto; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">AurinoFlix</h1>
+        <div>
+          <input type="text" id="filme" placeholder="Insira o título do filme">
+          <button onclick="adicionarFilme()">Adicionar Filme</button>
+          <p id="mensagemDeErro"></p>
+        </div>
+        <div id="listaFilmes"></div>
+      </div>
+      <footer>
+        <p style="font-family: Arial, Helvetica, sans-serif;"><a href="https://www.themoviedb.org/" target="_blank"></a>.<br></p>
+      </footer>
+      <script>
+        const listaFilmesFavoritos = [];
+        const apiKey = '6f7e8d7f58bd5afdbc3c64b3dd3e2b6c';
+
+        alert('Seja bem vindo(a). Crie seu catálogo de filmes favoritos. Fonte de dados: API Themoviedb.org');
+
+        function adicionarFilme() {
+            const filmeFavorito = document.getElementById('filme').value.toLowerCase();
+            if (filmeFavorito.trim() !== '') {
+                buscarInformacoesDoFilme(filmeFavorito);
+            } 
+            else {
+                document.getElementById('mensagemDeErro').innerHTML = 'Preencha o título do filme';
+                limpaCampos();
+            }
+        }
+        function buscarInformacoesDoFilme(titulo) {
+            fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${titulo}&language=pt-BR`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.results && data.results.length > 0) {
+                    const filme = data.results[0];
+                    const capa = `https://image.tmdb.org/t/p/w500/${filme.poster_path}`;
+                    const nome = filme.title;
+                    const descricao = filme.overview;
+                    const duracao = filme.runtime;
+                    const avaliacao = filme.vote_average;
+                    const idiomaOriginal = filme.original_language;
+                    const trailer = `https://www.themoviedb.org/key=${filme.id}`;
+                    
+                    const descricaoCurta = idiomaOriginal === 'en' ? descricao : `${descricao.substr(0, 200)}...`;
+                    
+                    const filmeHTML = `
+                    <div class="filme">
+                        <img src="${capa}" alt="Capa do Filme">
+                        <h3>${nome}</h3>
+                        <p>${descricaoCurta}</p>
+                        <p>Duração: ${duracao ? `${duracao} minutos` : 'Não informada'} | Avaliação: ${avaliacao}/10</p>
+                        <a href="${trailer}" target="_blank">Assistir Trailer</a>
+                        </div>
+                        <button onclick="removerFilme(${listaFilmesFavoritos.length})">Remover</button>
+                        `;
+                        listaFilmesFavoritos.push(filmeHTML);
+                        document.getElementById('mensagemDeErro').innerHTML = '';
+                        limpaCampos();
+                        recarregarFilmes();
+                    } 
+                    else {
+                        document.getElementById('mensagemDeErro').innerHTML = 'Nenhum filme encontrado com esse título ou título inválido.';
+                        limpaCampos();
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('mensagemDeErro').innerHTML = 'Erro ao buscar informações do filme.';
+                    limpaCampos();
+                });
+            }
+            function limpaCampos() {
+                document.getElementById('filme').value = '';
+            }
+            function recarregarFilmes() {
+                const elementoListaFilmes = document.getElementById('listaFilmes');
+                elementoListaFilmes.innerHTML = '';
+                for (let i = 0; i < listaFilmesFavoritos.length; i++) {
+                    const filmeHTML = listaFilmesFavoritos[i];
+                    elementoListaFilmes.innerHTML += filmeHTML;
+                }
+            }
+            function removerFilme(index) {
+                listaFilmesFavoritos.splice(index - 1, 1);
+                recarregarFilmes();
+            }
+      </script>
+   </body>
+</html>
